@@ -3,6 +3,7 @@ package ratelimiter
 
 import (
 	"context"
+	"fmt"
 	"time"
 )
 
@@ -24,8 +25,25 @@ const (
 )
 
 type Config struct {
-	Rate   int
+	Rate   float64
 	Period time.Duration
 	Burst  int
 	Store  Store
+}
+
+// New returns a Limiter using the given algorithm and config.
+func New(algo Algorithm, cfg Config) (Limiter, error) {
+
+	switch algo {
+
+	case TokenBucket:
+		return newTokenBucket(cfg)
+
+	case LeakyBucket, SlidingWindowLog, SlidingWindowCounter:
+		return nil, fmt.Errorf("ratelimiter: %v not yet implemented", algo)
+
+	default:
+		return nil, fmt.Errorf("ratelimiter: unknown algorithm %v", algo)
+
+	}
 }
